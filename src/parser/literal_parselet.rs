@@ -10,6 +10,11 @@ use crate::parser::{
     PrefixParselet,
 };
 
+use crate::error::{
+    Error::*,
+    throw,
+};
+
 
 pub struct LiteralParselet;
 
@@ -19,7 +24,7 @@ impl PrefixParselet for LiteralParselet {
             // Note: it's ok to use `unwrap` here because we already checked in the tokenizer
             // that this will parse to an `i32`
             TokenType::Int => Expression::Int (str::parse::<i32>(&token.get_value()).unwrap()),
-            _ => todo!(),
+            _ => throw(CouldNotParse (token.get_value())),
         }
     }
 }

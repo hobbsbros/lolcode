@@ -42,6 +42,11 @@ use literal_parselet::LiteralParselet;
 use break_parselet::BreakParselet;
 use call_parselet::CallParselet;
 
+use crate::error::{
+    Error::*,
+    throw,
+};
+
 
 /// Enumerates the types of expression available to the parser.
 #[derive(Clone, PartialEq, Debug)]
@@ -137,7 +142,7 @@ impl Parser {
 
         let parselet = match self.prefix_parselets.get(&token.get_type()) {
             Some(p) => p,
-            None => todo!(),
+            None => throw(CouldNotParse (token.get_value())),
         };
 
         let mut left: Expression = parselet.parse(self, tokenizer, token);

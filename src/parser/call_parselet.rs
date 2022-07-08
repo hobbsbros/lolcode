@@ -10,6 +10,11 @@ use crate::parser::{
     PrefixParselet,
 };
 
+use crate::error::{
+    Error::*,
+    throw,
+};
+
 
 pub struct CallParselet;
 
@@ -17,12 +22,12 @@ impl PrefixParselet for CallParselet {
     fn parse(&self, parser: &Parser, tokenizer: &mut Tokenizer, token: Token) -> Expression {
         let t = match tokenizer.next() {
             Some(n) => n,
-            None => todo!(),
+            None => throw(UnexpectedEof),
         };
 
         let identifier = match t.get_type() {
             TokenType::Identifier => t.get_value(),
-            _ => todo!(),
+            _ => throw(ExpectedIdentifier),
         };
 
         let mut body: Vec<Expression> = Vec::new();
@@ -30,7 +35,7 @@ impl PrefixParselet for CallParselet {
         while {
             let next = match tokenizer.peek() {
                 Some(n) => n,
-                None => todo!(),
+                None => throw(UnexpectedEof),
             };
 
             next.get_type() != TokenType::EndCall
@@ -39,7 +44,7 @@ impl PrefixParselet for CallParselet {
             if let Some(e) = expr {
                 body.push(e);
             } else {
-                todo!();
+                throw(CouldNotParse (token.get_value()));
             }
         }
 
@@ -47,10 +52,10 @@ impl PrefixParselet for CallParselet {
             if t.get_type() == TokenType::EndCall {
                 // No problem!
             } else {
-                todo!()
+                throw(CouldNotParse (t.get_value()));
             }
         } else {
-            todo!()
+            throw(UnexpectedEof);
         }
 
         Expression::Call {

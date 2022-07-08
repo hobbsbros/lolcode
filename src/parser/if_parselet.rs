@@ -10,6 +10,11 @@ use crate::parser::{
     PrefixParselet,
 };
 
+use crate::error::{
+    Error::*,
+    throw,
+};
+
 
 pub struct IfParselet;
 
@@ -17,7 +22,7 @@ impl PrefixParselet for IfParselet {
     fn parse(&self, parser: &Parser, tokenizer: &mut Tokenizer, token: Token) -> Expression {
         let condition = match parser.parse(token.get_type().into(), tokenizer) {
             Some(c) => c,
-            None => todo!(),
+            None => throw(CouldNotParse (token.get_value())),
         };
 
         let mut body: Vec<Expression> = Vec::new();
@@ -25,7 +30,7 @@ impl PrefixParselet for IfParselet {
         while {
             let next = match tokenizer.peek() {
                 Some(n) => n,
-                None => todo!(),
+                None => throw(UnexpectedEof),
             };
 
             next.get_type() != TokenType::EndIf
@@ -34,7 +39,7 @@ impl PrefixParselet for IfParselet {
             if let Some(e) = expr {
                 body.push(e);
             } else {
-                todo!();
+                throw(CouldNotParse (token.get_value()));
             }
         }
 

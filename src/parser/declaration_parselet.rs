@@ -10,6 +10,11 @@ use crate::parser::{
     PrefixParselet,
 };
 
+use crate::error::{
+    Error::*,
+    throw,
+};
+
 
 pub struct DeclarationParselet;
 
@@ -19,7 +24,7 @@ impl PrefixParselet for DeclarationParselet {
             TokenType::Declaration => {
                 let identifier = match tokenizer.peek() {
                     Some(i) => i,
-                    None => todo!(),
+                    None => throw(UnexpectedEof),
                 };
 
                 match identifier.get_type() {
@@ -29,10 +34,10 @@ impl PrefixParselet for DeclarationParselet {
                             identifier: identifier.get_value()
                         }
                     },
-                    _ => todo!(),
+                    _ => throw(ExpectedIdentifier),
                 }
             },
-            _ => todo!(),
+            _ => throw(ExpectedDeclaration (token.get_value())),
         }
     }
 }

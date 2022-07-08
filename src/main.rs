@@ -4,6 +4,7 @@
 pub mod tokenizer;
 pub mod parser;
 pub mod emitter;
+pub mod error;
 
 
 use std::{
@@ -15,28 +16,35 @@ use std::{
     env,
 };
 
-use colored::*;
-
 use tokenizer::Tokenizer;
 use parser::Parser;
 use emitter::Emitter;
+use error::{
+    Error::*,
+    throw,
+};
 
 
 fn main() {
-    println!("{}", "The LOLCODE Compiler".truecolor(255, 125, 0).bold());
+    let filename: String = match env::args().nth(1) {
+        Some(f) => f,
+        None => throw(NoFilenameProvided),
+    };
 
-    // TODO: do not use `unwrap`
-    let filename: String = env::args().nth(1).unwrap();
+    let file: String = match read_to_string(&filename) {
+        Ok(f) => f,
+        Err(_) => throw(CouldNotRead (filename)),
+    };
 
-    let file: String = read_to_string(&filename).unwrap();
-
+    // Tokenize, parse, and emit code
     let mut tokenizer = Tokenizer::new(file);
-
     let parser = Parser::new();
-
     let emitter = Emitter::new(&mut tokenizer, &parser);
 
-    let output_filename = "out.c".to_string();
+    // Construct a filename for the output
+    let mut output_filename = filename.clone();
+    output_filename.truncate(output_filename.len() - 4);
+    output_filename.push_str(".c");
 
     // Open a file for output
     let mut output = match OpenOptions::new()
@@ -46,11 +54,11 @@ fn main() {
         .open(output_filename.to_owned())
     {
         Ok(f) => f,
-        Err(_) => todo!(),
+        Err(_) => throw(CouldNotOpen (output_filename)),
     };
 
     match output.write_all(emitter.output().as_bytes()) {
         Ok(_) => (),
-        Err(_) => todo!(),
+        Err(_) => throw(CouldNotWrite (output_filename)),
     };
 }

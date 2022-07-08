@@ -10,6 +10,11 @@ use crate::parser::{
     PrefixParselet,
 };
 
+use crate::error::{
+    Error::*,
+    throw,
+};
+
 
 pub struct LoopParselet;
 
@@ -17,12 +22,12 @@ impl PrefixParselet for LoopParselet {
     fn parse(&self, parser: &Parser, tokenizer: &mut Tokenizer, token: Token) -> Expression {
         let label = match tokenizer.next() {
             Some(l) => l,
-            None => todo!(),
+            None => throw(UnexpectedEof),
         };
 
         match label.get_type() {
             TokenType::Identifier => (),
-            _ => todo!(),
+            _ => throw(ExpectedIdentifier),
         };
 
         let mut body: Vec<Expression> = Vec::new();
@@ -30,7 +35,7 @@ impl PrefixParselet for LoopParselet {
         while {
             let next = match tokenizer.peek() {
                 Some(n) => n,
-                None => todo!(),
+                None => throw(UnexpectedEof),
             };
 
             next.get_type() != TokenType::EndLoop
@@ -39,28 +44,24 @@ impl PrefixParselet for LoopParselet {
             if let Some(e) = expr {
                 body.push(e);
             } else {
-                todo!();
+                throw(CouldNotParse (token.get_value()));
             }
         }
 
         if let Some(t) = tokenizer.next() {
-            if t.get_type() == TokenType::EndLoop {
-                // No problem!
-            } else {
-                todo!()
+            if t.get_type() != TokenType::EndLoop {
+                throw(CouldNotParse (token.get_value()));
             }
         } else {
-            todo!()
+            throw(UnexpectedEof);
         }
 
         if let Some(t) = tokenizer.next() {
-            if t.get_type() == TokenType::Identifier && t.get_value() == label.get_value() {
-                // No problem!
-            } else {
-                todo!()
+            if t.get_type() != TokenType::Identifier || t.get_value() != label.get_value() {
+                throw(CouldNotParse (token.get_value()));
             }
         } else {
-            todo!()
+            throw(UnexpectedEof);
         }
 
         Expression::Loop {

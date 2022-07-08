@@ -10,6 +10,11 @@ use crate::parser::{
     InfixParselet,
 };
 
+use crate::error::{
+    Error::*,
+    throw,
+};
+
 
 pub struct BinOpParselet;
 
@@ -17,7 +22,7 @@ impl InfixParselet for BinOpParselet {
     fn parse(&self, parser: &Parser, tokenizer: &mut Tokenizer, left: Expression, token: Token) -> Expression {
         let right: Expression = match parser.parse(token.get_type().into(), tokenizer) {
             Some(v) => v,
-            None => todo!(),
+            None => throw(CouldNotParse (token.get_value())),
         };
 
         match token.get_type() {
@@ -33,7 +38,7 @@ impl InfixParselet for BinOpParselet {
                     right: Box::new(right),
                 }
             },
-            _ => todo!()
+            _ => throw(CouldNotParse (token.get_value())),
         }
     }
 }
