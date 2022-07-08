@@ -30,7 +30,7 @@ fn print(s: String) {
 
 
 pub fn throw(error: Error) -> ! {
-    println!("{}\n\n", "The LOLCODE Compiler".truecolor(255, 125, 0).bold());
+    println!("{}\n", "The LOLCODE Compiler".truecolor(255, 125, 0).bold());
 
     match error {
         NoFilenameProvided => print("No filename provided.".to_string()),
