@@ -99,7 +99,7 @@ impl Emitter {
                 left: l,
                 op: o,
                 right: r,
-            } => format!("{} {} {}", Self::emit(&*l), Self::get_op(*o), Self::emit(&*r)),
+            } => format!("({} {} {})", Self::emit(&*l), Self::get_op(*o), Self::emit(&*r)),
             Expression::Call {
                 identifier: i,
                 args: a,
@@ -145,9 +145,9 @@ impl Emitter {
             } => {
                 let mut emitted = String::new();
 
-                emitted.push_str("if (");
+                emitted.push_str("if ");
                 emitted.push_str(&Self::emit(c));
-                emitted.push_str(") {\n");
+                emitted.push_str(" {\n");
 
                 for expr in b {
                     emitted.push_str(&Self::emit(&expr));

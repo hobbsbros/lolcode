@@ -241,11 +241,11 @@ impl Tokenizer {
                         let mut c = current;
 
                         // This is the beginning of a comparison
-                        while c.len() < 7 {
+                        while c.len() < 8 {
                             c.push(charstream.next());
                         }
 
-                        if c.as_str() == "EKWAL 2" {
+                        if c.as_str() == "EKWAL TO" {
                             Token::new(c, TokenType::Equal)
                         } else {
                             Token::new(c, TokenType::Unknown)
