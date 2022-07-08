@@ -237,15 +237,15 @@ impl Tokenizer {
                             Token::new(c, TokenType::Unknown)
                         }
                     },
-                    "EQUAL" => {
+                    "EKWAL" => {
                         let mut c = current;
 
                         // This is the beginning of a comparison
-                        while c.len() < 8 {
+                        while c.len() < 7 {
                             c.push(charstream.next());
                         }
 
-                        if c.as_str() == "EQUAL TO" {
+                        if c.as_str() == "EKWAL 2" {
                             Token::new(c, TokenType::Equal)
                         } else {
                             Token::new(c, TokenType::Unknown)
