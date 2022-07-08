@@ -251,6 +251,10 @@ impl Tokenizer {
                             Token::new(c, TokenType::Unknown)
                         }
                     },
+                    "PLUS" => Token::new(current, TokenType::Plus),
+                    "MAINUS" => Token::new(current, TokenType::Minus),
+                    "TAIMZ" => Token::new(current, TokenType::Multiply),
+                    "OVR" => Token::new(current, TokenType::Divide),
                     "ENUF" => Token::new(current, TokenType::Break),
                     "MKAY" => Token::new(current, TokenType::EndCall),
                     "KTHX" => Token::new(current, TokenType::EndIf),
@@ -312,10 +316,6 @@ impl Tokenizer {
                     return None;
                 }
             },
-            '+' => Token::new(chr.to_string(), TokenType::Plus),
-            '-' => Token::new(chr.to_string(), TokenType::Minus),
-            '*' => Token::new(chr.to_string(), TokenType::Multiply),
-            '/' => Token::new(chr.to_string(), TokenType::Divide),
             _ => Token::new(chr.to_string(), TokenType::Unknown),
         };
 

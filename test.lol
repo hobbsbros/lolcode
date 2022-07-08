@@ -7,7 +7,7 @@ I HAS A VAR
 VAR R 0
 
 IM IN YR LOOP
-    VAR R VAR + 1
+    VAR R VAR PLUS 1
     IZ VAR BIGGER THAN 10?
         ENUF
     KTHX
