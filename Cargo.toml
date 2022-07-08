@@ -1,5 +1,6 @@
 [package]
 name = "lolcode"
+description = "A simple Lolcode to C compiler."
 version = "0.1.0"
 edition = "2021"
 authors = ["Joseph Hobbs"]
