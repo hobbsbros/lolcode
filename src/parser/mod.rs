@@ -3,6 +3,7 @@
 
 pub mod infix;
 pub mod prefix;
+pub mod precedence;
 
 pub mod identifier_parselet;
 pub mod begin_parselet;
@@ -43,7 +44,7 @@ use call_parselet::CallParselet;
 
 
 /// Enumerates the types of expression available to the parser.
-#[derive(Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum Expression {
     BeginPgrm,
     Include {
@@ -109,6 +110,7 @@ impl Parser {
         infix_parselets.insert(TokenType::Divide, Box::new(BinOpParselet {}));
         infix_parselets.insert(TokenType::Greater, Box::new(BinOpParselet {}));
         infix_parselets.insert(TokenType::Lesser, Box::new(BinOpParselet {}));
+        infix_parselets.insert(TokenType::Equal, Box::new(BinOpParselet {}));
 
         Self {
             prefix_parselets,
@@ -116,8 +118,18 @@ impl Parser {
         }
     }
 
+    /// Gets the precedence of the next token.
+    pub fn get_precedence(&self, tokenizer: &Tokenizer) -> u8 {
+        let next = match tokenizer.peek() {
+            Some(n) => n,
+            None => return 0,
+        };
+
+        next.get_type().into()
+    }
+
     /// Parses from a tokenizer.
-    pub fn parse(&self, tokenizer: &mut Tokenizer) -> Option<Expression> {
+    pub fn parse(&self, precedence: u8, tokenizer: &mut Tokenizer) -> Option<Expression> {
         let token = match tokenizer.next() {
             Some(t) => t,
             None => return None,
@@ -128,32 +140,36 @@ impl Parser {
             None => todo!(),
         };
 
-        let left: Expression = parselet.parse(self, tokenizer, token);
+        let mut left: Expression = parselet.parse(self, tokenizer, token);
 
-        let next = match tokenizer.peek() {
-            Some(t) => t,
-            None => return Some(left),
-        };
+        while precedence < self.get_precedence(tokenizer) {
+            let next = match tokenizer.peek() {
+                Some(t) => t,
+                None => return Some(left),
+            };
+    
+            let parselet = match self.infix_parselets.get(&next.get_type()) {
+                Some(p) => {
+                    tokenizer.next();
+                    p
+                },
+                None => return Some(left),
+            };
 
-        let parselet = match self.infix_parselets.get(&next.get_type()) {
-            Some(p) => {
-                tokenizer.next();
-                p
-            },
-            None => return Some(left),
-        };
+            left = parselet.parse(self, tokenizer, left, next)
+        }
 
-        Some(parselet.parse(self, tokenizer, left, next))
+        Some(left)
     }
 
     /// Parses a program.
     pub fn parse_all(&self, tokenizer: &mut Tokenizer) -> Vec<Expression> {
         let mut program = Vec::new();
 
-        while let Some(e) = self.parse(tokenizer) {
+        while let Some(e) = self.parse(0, tokenizer) {
             program.push(e);
         }
 
-        program
+        program.to_owned()
     }
 }

@@ -15,7 +15,7 @@ pub struct BinOpParselet;
 
 impl InfixParselet for BinOpParselet {
     fn parse(&self, parser: &Parser, tokenizer: &mut Tokenizer, left: Expression, token: Token) -> Expression {
-        let right: Expression = match parser.parse(tokenizer) {
+        let right: Expression = match parser.parse(token.get_type().into(), tokenizer) {
             Some(v) => v,
             None => todo!(),
         };

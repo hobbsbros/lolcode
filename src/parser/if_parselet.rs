@@ -14,8 +14,8 @@ use crate::parser::{
 pub struct IfParselet;
 
 impl PrefixParselet for IfParselet {
-    fn parse(&self, parser: &Parser, tokenizer: &mut Tokenizer, _token: Token) -> Expression {
-        let condition = match parser.parse(tokenizer) {
+    fn parse(&self, parser: &Parser, tokenizer: &mut Tokenizer, token: Token) -> Expression {
+        let condition = match parser.parse(token.get_type().into(), tokenizer) {
             Some(c) => c,
             None => todo!(),
         };
@@ -30,7 +30,7 @@ impl PrefixParselet for IfParselet {
 
             next.get_type() != TokenType::EndIf
         } {
-            let expr = parser.parse(tokenizer);
+            let expr = parser.parse(token.get_type().into(), tokenizer);
             if let Some(e) = expr {
                 body.push(e);
             } else {

@@ -35,7 +35,7 @@ impl PrefixParselet for CallParselet {
 
             next.get_type() != TokenType::EndCall
         } {
-            let expr = parser.parse(tokenizer);
+            let expr = parser.parse(token.get_type().into(), tokenizer);
             if let Some(e) = expr {
                 body.push(e);
             } else {

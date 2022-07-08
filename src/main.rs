@@ -3,22 +3,29 @@
 
 pub mod tokenizer;
 pub mod parser;
+pub mod emitter;
 
 
 use std::{
+    io::Write,
     fs::{
-        self,
+        OpenOptions,
         read_to_string,
     },
     env,
 };
 
+use colored::*;
+
 use tokenizer::Tokenizer;
 use parser::Parser;
+use emitter::Emitter;
 
 
 fn main() {
-    // Do not use `unwrap`
+    println!("{}", "The LOLCODE Compiler".truecolor(255, 125, 0).bold());
+
+    // TODO: do not use `unwrap`
     let filename: String = env::args().nth(1).unwrap();
 
     let file: String = read_to_string(&filename).unwrap();
@@ -27,5 +34,23 @@ fn main() {
 
     let parser = Parser::new();
 
-    dbg!(&parser.parse_all(&mut tokenizer));
+    let emitter = Emitter::new(&mut tokenizer, &parser);
+
+    let output_filename = "out.c".to_string();
+
+    // Open a file for output
+    let mut output = match OpenOptions::new()
+        .create(true)
+        .write(true)
+        .truncate(true)
+        .open(output_filename.to_owned())
+    {
+        Ok(f) => f,
+        Err(_) => todo!(),
+    };
+
+    match output.write_all(emitter.output().as_bytes()) {
+        Ok(_) => (),
+        Err(_) => todo!(),
+    };
 }

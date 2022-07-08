@@ -13,8 +13,8 @@ use crate::parser::{
 pub struct AssignmentParselet;
 
 impl InfixParselet for AssignmentParselet {
-    fn parse(&self, parser: &Parser, tokenizer: &mut Tokenizer, left: Expression, _token: Token) -> Expression {
-        let value: Expression = match parser.parse(tokenizer) {
+    fn parse(&self, parser: &Parser, tokenizer: &mut Tokenizer, left: Expression, token: Token) -> Expression {
+        let value: Expression = match parser.parse(token.get_type().into(), tokenizer) {
             Some(v) => v,
             None => todo!(),
         };

@@ -53,6 +53,7 @@ pub enum TokenType {
     Divide,
     Greater,
     Lesser,
+    Equal,
     Call,
     EndCall,
     If,
@@ -211,7 +212,7 @@ impl Tokenizer {
                     "BIGGER" => {
                         let mut c = current;
 
-                        // This is the beginning of a declaration
+                        // This is the beginning of a comparison
                         while c.len() < 11 {
                             c.push(charstream.next());
                         }
@@ -225,13 +226,27 @@ impl Tokenizer {
                     "SMALLER" => {
                         let mut c = current;
 
-                        // This is the beginning of a declaration
+                        // This is the beginning of a comparison
                         while c.len() < 12 {
                             c.push(charstream.next());
                         }
 
                         if c.as_str() == "SMALLER THAN" {
                             Token::new(c, TokenType::Lesser)
+                        } else {
+                            Token::new(c, TokenType::Unknown)
+                        }
+                    },
+                    "EQUAL" => {
+                        let mut c = current;
+
+                        // This is the beginning of a comparison
+                        while c.len() < 8 {
+                            c.push(charstream.next());
+                        }
+
+                        if c.as_str() == "EQUAL TO" {
+                            Token::new(c, TokenType::Equal)
                         } else {
                             Token::new(c, TokenType::Unknown)
                         }
@@ -247,6 +262,12 @@ impl Tokenizer {
                             charstream.next();
                         }
 
+                        match Self::get_next(charstream) {
+                            Some(t) => t,
+                            None => Token::new(String::new(), TokenType::Unknown),
+                        }
+                    },
+                    "AN" => {
                         match Self::get_next(charstream) {
                             Some(t) => t,
                             None => Token::new(String::new(), TokenType::Unknown),

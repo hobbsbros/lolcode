@@ -14,7 +14,7 @@ use crate::parser::{
 pub struct LoopParselet;
 
 impl PrefixParselet for LoopParselet {
-    fn parse(&self, parser: &Parser, tokenizer: &mut Tokenizer, _token: Token) -> Expression {
+    fn parse(&self, parser: &Parser, tokenizer: &mut Tokenizer, token: Token) -> Expression {
         let label = match tokenizer.next() {
             Some(l) => l,
             None => todo!(),
@@ -35,7 +35,7 @@ impl PrefixParselet for LoopParselet {
 
             next.get_type() != TokenType::EndLoop
         } {
-            let expr = parser.parse(tokenizer);
+            let expr = parser.parse(token.get_type().into(), tokenizer);
             if let Some(e) = expr {
                 body.push(e);
             } else {
