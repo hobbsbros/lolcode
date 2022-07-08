@@ -1,4 +1,4 @@
-//! A simple tokenizer.
+//! A simple tokenizer for Lolcode.
 
 
 /// Provides a character stream for the tokenizer.
@@ -35,7 +35,7 @@ impl CharStream {
 
 
 /// Defines the types of tokens available to the tokenizer.
-#[derive(PartialEq, Copy, Clone, Debug)]
+#[derive(PartialEq, Eq, Hash, Copy, Clone, Debug)]
 pub enum TokenType {
     BeginPgrm,
     Include,
@@ -44,13 +44,21 @@ pub enum TokenType {
     Declaration,
     Assignment,
     Int,
-    Loop,
+    BeginLoop,
+    EndLoop,
+    Break,
     Plus,
     Minus,
     Multiply,
     Divide,
+    Greater,
+    Lesser,
+    Call,
+    EndCall,
+    If,
+    EndIf,
     Unknown,
-    Eof
+    Eof,
 }
 
 
@@ -80,7 +88,7 @@ impl Token {
 }
 
 
-const SEPARATORS: &str = "\n\0 ";
+const SEPARATORS: &str = "\n\0? ";
 
 
 /// Creates an abstraction over a tokenizer.
@@ -139,22 +147,98 @@ impl Tokenizer {
 
                 match current.as_str() {
                     "I" => {
-                        let mut current = chr.to_string();
+                        let mut c = current;
 
-                        // This is the beginning of a declaration
-                        while current.len() < 7 {
-                            current.push(charstream.next());
+                        // This is the beginning of a loop instruction
+                        while c.len() < 4 {
+                            c.push(charstream.next());
                         }
 
-                        if current.as_str() == "I HAS A" {
-                            Token::new(current, TokenType::Declaration)
+                        if c.as_str() == "I IZ" {
+                            Token::new(c, TokenType::Call)
                         } else {
-                            Token::new(current, TokenType::Unknown)
+                            // This is the beginning of a declaration
+                            while c.len() < 7 {
+                                c.push(charstream.next());
+                            }
+
+                            if c.as_str() == "I HAS A" {
+                                Token::new(c, TokenType::Declaration)
+                            } else {
+                                Token::new(c, TokenType::Unknown)
+                            }
                         }
                     },
                     "R" => Token::new(current, TokenType::Assignment),
-                    "IM" => Token::new(current, TokenType::Loop),
-                    "CAN" => Token::new(current, TokenType::Include),
+                    "IM" => {
+                        let mut c = current;
+
+                        // This is the beginning of a loop instruction
+                        while c.len() < 8 {
+                            c.push(charstream.next());
+                        }
+
+                        if c.as_str() == "IM IN YR" {
+                            Token::new(c, TokenType::BeginLoop)
+                        } else {
+                            // This is the beginning of a declaration
+                            while c.len() < 11 {
+                                c.push(charstream.next());
+                            }
+
+                            if c.as_str() == "IM OUTTA YR" {
+                                Token::new(c, TokenType::EndLoop)
+                            } else {
+                                Token::new(c, TokenType::Unknown)
+                            }
+                        }
+                    },
+                    "IZ" => Token::new(current, TokenType::If),
+                    "CAN" => {
+                        let mut c = current;
+
+                        // This is the beginning of a declaration
+                        while c.len() < 7 {
+                            c.push(charstream.next());
+                        }
+
+                        if c.as_str() == "CAN HAS" {
+                            Token::new(c, TokenType::Include)
+                        } else {
+                            Token::new(c, TokenType::Unknown)
+                        }
+                    },
+                    "BIGGER" => {
+                        let mut c = current;
+
+                        // This is the beginning of a declaration
+                        while c.len() < 11 {
+                            c.push(charstream.next());
+                        }
+
+                        if c.as_str() == "BIGGER THAN" {
+                            Token::new(c, TokenType::Greater)
+                        } else {
+                            Token::new(c, TokenType::Unknown)
+                        }
+                    },
+                    "SMALLER" => {
+                        let mut c = current;
+
+                        // This is the beginning of a declaration
+                        while c.len() < 12 {
+                            c.push(charstream.next());
+                        }
+
+                        if c.as_str() == "SMALLER THAN" {
+                            Token::new(c, TokenType::Lesser)
+                        } else {
+                            Token::new(c, TokenType::Unknown)
+                        }
+                    },
+                    "ENUF" => Token::new(current, TokenType::Break),
+                    "MKAY" => Token::new(current, TokenType::EndCall),
+                    "KTHX" => Token::new(current, TokenType::EndIf),
                     "HAI" => Token::new(current, TokenType::BeginPgrm),
                     "KTHXBYE" => Token::new(current, TokenType::EndPgrm),
                     "BTW" => {
@@ -218,16 +302,16 @@ impl Tokenizer {
     }
 
     /// Peeks at the next token in the token stream without consuming it.
-    pub fn peek(&self) -> Token {
+    pub fn peek(&self) -> Option<Token> {
         if self.index >= self.stream.len() {
-            Token::new(String::new(), TokenType::Eof)
+            None
         } else {
-            self.stream[self.index].to_owned()
+            Some(self.stream[self.index].to_owned())
         }
     }
 
     /// Gets the next token out of the token stream.
-    pub fn next(&mut self) -> Token {
+    pub fn next(&mut self) -> Option<Token> {
         let token = self.peek();
         self.index += 1;
         token

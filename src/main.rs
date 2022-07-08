@@ -2,6 +2,7 @@
 
 
 pub mod tokenizer;
+pub mod parser;
 
 
 use std::{
@@ -12,9 +13,8 @@ use std::{
     env,
 };
 
-use tokenizer::{
-    Tokenizer,
-};
+use tokenizer::Tokenizer;
+use parser::Parser;
 
 
 fn main() {
@@ -23,7 +23,9 @@ fn main() {
 
     let file: String = read_to_string(&filename).unwrap();
 
-    let tokenizer = Tokenizer::new(file);
+    let mut tokenizer = Tokenizer::new(file);
 
-    dbg!(&tokenizer.collect());
+    let parser = Parser::new();
+
+    dbg!(&parser.parse_all(&mut tokenizer));
 }
