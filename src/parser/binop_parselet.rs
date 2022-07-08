@@ -31,7 +31,8 @@ impl InfixParselet for BinOpParselet {
             | TokenType::Multiply
             | TokenType::Divide
             | TokenType::Greater
-            | TokenType::Lesser => {
+            | TokenType::Lesser 
+            | TokenType::Equal => {
                 Expression::BinOp {
                     left: Box::new(left),
                     op: token.get_type(),
