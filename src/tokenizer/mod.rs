@@ -89,7 +89,7 @@ impl Token {
 }
 
 
-const SEPARATORS: &str = "\n\0? ";
+const SEPARATORS: &str = "\r\n\0? ";
 
 
 /// Creates an abstraction over a tokenizer.
